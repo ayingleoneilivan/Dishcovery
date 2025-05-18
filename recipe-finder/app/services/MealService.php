@@ -52,6 +52,15 @@ class MealService
     }
 
     /**
+     * Get meal details by ID
+     */
+    public function getMealById($id)
+    {
+        $url = $this->baseUrl . 'lookup.php?i=' . urlencode($id);
+        return $this->makeRequest($url);
+    }
+
+    /**
      * Make API request
      */
     protected function makeRequest($url)
