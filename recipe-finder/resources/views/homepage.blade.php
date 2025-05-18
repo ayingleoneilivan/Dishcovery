@@ -38,9 +38,9 @@
     <!-- Cuisines -->
     <h1 class="text-xl font-medium">Cuisines</h1>
     @foreach($areas['data']['meals'] as $index => $area)
-        <div class="{{ $index >= 5 ? 'hidden cuisine-extra' : '' }}">
+        <div class="{{ $index >= 15 ? 'hidden cuisine-extra' : '' }}">
             <input 
-                type="checkbox" 
+                type="radio" 
                 name="area[]" 
                 value="{{ $area['strArea'] }}" 
                 onchange="this.form.submit()"
@@ -55,9 +55,9 @@
     <!-- Meal Types -->
     <h1 class="text-xl font-medium mt-6">Meal Types</h1>
     @foreach($categories['data']['categories'] as $index => $category)
-        <div class="{{ $index >= 5 ? 'hidden category-extra' : '' }}">
+        <div>
             <input 
-                type="checkbox" 
+                type="radio" 
                 name="category[]" 
                 value="{{ $category['strCategory'] }}" 
                 onchange="this.form.submit()"
@@ -65,33 +65,35 @@
             <label>{{ $category['strCategory'] }}</label><br>
         </div>
     @endforeach
-    @if(count($categories['data']['categories']) > 5)
-        <button type="button" id="toggleCategory" class="text-blue-600 hover:underline mt-1">See more</button>
-    @endif
-</form>
-
-
+    </form>
         </div>
         <div class="col-span-3">
             <div class="grid grid-cols-3 gap-4">
             @foreach($meals as $meal)
+                @php
+                    $isFavorite = auth()->check() && \App\Models\Favorite::where('user_id', auth()->id())
+                        ->where('meal_id', $meal['idMeal'])
+                        ->exists();
+                @endphp
                 <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-                    <a href="#">
-                        <img src="{{ $meal['strMealThumb'] }}" alt="{{ $meal['strMeal'] }}" class="w-full h-48 p-2 rounded-2xl object-cover">
-                    </a>
+                <a href="{{ route('meal.details', ['id' => $meal['idMeal']]) }}">
+                    <img src="{{ $meal['strMealThumb'] }}" alt="{{ $meal['strMeal'] }}" class="w-full h-48 p-2 rounded-2xl object-cover">
+                </a>
                     <div class="flex justify-between px-4 pb-8">
                         <div>
                             <p class="text-sm text-slate-500">Food</p>
                             <h1 class="text-xl font-bold">{{ $meal['strMeal'] }}</h1>
                             <!-- <h2 class="text-xl font-semibold text-amber-500">30 Mins</h2> -->
                         </div>
-                        <div class="flex flex-col justify-between items-end">
-                            <div class="flex items-center space-x-2">
-                                <i class="ph-fill ph-star text-yellow-400"></i>
-                                <p class="text-sm text-slate-500">4.9</p> <!-- Optional: static rating -->
-                            </div>
-                            <i class="text-2xl ph-bold ph-heart"></i>
-                        </div>
+                        <button 
+                            class="favorite-btn"
+                            style="cursor: pointer;"
+                            data-meal-id="{{ $meal['idMeal'] }}" 
+                            data-meal-name="{{ $meal['strMeal'] }}"
+                            data-meal-thumb="{{ $meal['strMealThumb'] }}"
+                        >
+                            <i class="text-2xl {{ $isFavorite ? 'ph-fill text-red-500' : 'ph-bold text-gray-400' }} ph-heart"></i>
+                        </button>
                     </div>
                 </div>
             @endforeach
@@ -125,6 +127,42 @@
         toggleCategory.textContent = categoryExpanded ? 'See less' : 'See more';
     });
 </script>
+<script>
+    document.querySelectorAll('.favorite-btn').forEach(button => {
+        button.addEventListener('click', async function () {
+            const mealId = this.dataset.mealId;
+            const mealName = this.dataset.mealName;
+            const mealThumb = this.dataset.mealThumb;
+            const icon = this.querySelector('i');
 
+            try {
+                const res = await fetch("{{ route('favorite.toggle') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        meal_id: mealId,
+                        meal_name: mealName,
+                        meal_thumb: mealThumb
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.status === "added") {
+                    icon.classList.remove('ph-bold', 'text-gray-400');
+                    icon.classList.add('ph-fill', 'text-red-500');
+                } else if (data.status === "removed") {
+                    icon.classList.remove('ph-fill', 'text-red-500');
+                    icon.classList.add('ph-bold', 'text-gray-400');
+                }
+            } catch (err) {
+                alert("You need to login first.");
+            }
+        });
+    });
+</script>
 </body>
 </html>
