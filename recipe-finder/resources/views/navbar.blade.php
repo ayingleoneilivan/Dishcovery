@@ -10,20 +10,21 @@
 
         <!-- Nav Links -->
         <ul class="flex space-x-12 text-lg">
-            <a href="/dist/index.html"><li>Home</li></a>
-            <li>Recipes</li>
+            <li></li>
+            <li></li>
+            <a href="{{ route('meals.index') }}"><li>Home</li></a>
             <li>About</li>
         </ul>
 
         <!-- Search Bar -->
-        <div class="flex justify-between items-center w-1/3 rounded-sm text-slate-500 bg-white">
+        <div class="flex justify-between items-center w-1/2 rounded-sm text-slate-500 bg-white">
             <form class="ml-4">Search</form>
             <i class="p-2 rounded-e-sm text-xl ph ph-magnifying-glass bg-amber-500 text-white"></i>
         </div>
 
         <!-- Icons -->
         <div class="flex space-x-4 items-center relative">
-            <a class="text-2xl" href="/dist/favourites.html">
+            <a class="text-2xl" href="{{ route('favorites.index') }}">
                 <i class="ph ph-heart"></i>
             </a>
 
@@ -40,7 +41,7 @@
                             <a href="" class="block px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">Profile</a>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">
+                                <button type="submit" style="cursor: pointer;" class="block w-full text-left px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">
                                     Logout
                                 </button>
                             </form>
