@@ -5,8 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Pork Adobo</title>
+    <title>{{ $meal['strMeal'] }}</title>
 </head>
+<style>
+        .favorite-btn {
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            padding: 0.625rem 1rem; /* 10px 16px */
+            border-radius: 0.5rem; /* rounded-lg */
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: black;
+            color: white;
+        }
+
+        .favorite-btn.active {
+            background-color: #ff4d6d; /* pink/red when active */
+            color: white;
+        }
+
+    </style>
 
 <body class="b">
     <header>
@@ -18,42 +37,95 @@
             <div class="grid grid-cols-3 group space-x-20">
                 <div class="col-span-2 shrink-0">
                     <div class="">
-                        <img src="images/Pork Adobo.jpg" alt="" class="object-cover rounded-2xl">
+                        <img src="{{ $meal['strMealThumb'] }}" alt="{{ $meal['strMeal'] }}" class="object-cover rounded-2xl">
                     </div>
                 </div>
                 <div class="col-span-1 mt-6 sm:mt-8 lg:mt-0">
-                    <h1 class="text-2xl font-bold sm:text-4xl ">Pork Adobo</ph1>
-                    <h2 class="mt-2 sm:text-xl font-light text-gray-500">Food</h2>
-                    <div class="">
-                        <h1 class="mt-4 font-medium sm:text-2xl">Ingredients</h1>
-                        <div class="">
-                            <ul class="mt-4 ml-4 list-disc"> 
-                                <li>2 tablespoons neutral oil (such as vegetable, canola, or avocado oil)</li>
-                                <li>2 pounds boneless pork shoulder or pork butt (cut into large chunks)</li>
-                                <li>¼ cup cane vinegar or white vinegar</li>
-                                <li>⅓ cup low sodium soy sauce</li>
-                                <li>6 cloves garlic (chopped)</li>
-                                <li>1 bay leaf</li>
-                                <li>2 teaspoons black peppercorns</li>
-                                <li>2 teaspoons sugar (or brown sugar)</li>
-                                <li>2 cups water</li>
-                            </ul>
-                            
-                        </div>
+                    <h1 class="text-2xl font-bold sm:text-4xl">{{ $meal['strMeal'] }}</h1>
+                    <h2 class="mt-2 sm:text-xl font-light text-gray-500">{{ $meal['strCategory'] }} - {{ $meal['strArea'] }}</h2>
+
+                    <div class="mt-4">
+                        <h3 class="font-medium sm:text-2xl">Ingredients</h3>
+                        <ul class="mt-4 ml-4 list-disc">
+                            @for ($i = 1; $i <= 20; $i++)
+                                @if (!empty($meal['strIngredient' . $i]) && !empty($meal['strMeasure' . $i]))
+                                    <li>{{ $meal['strMeasure' . $i] }} {{ $meal['strIngredient' . $i] }}</li>
+                                @endif
+                            @endfor
+                        </ul>
+                    </div>
+
+                    <div class="mt-4">
+                        <h3 class="font-medium sm:text-2xl">Instructions</h3>
+                        <p class="mt-2">{{ $meal['strInstructions'] }}</p>
                     </div>
 
                     <hr class="my-4 flex-grow border-t border-gray-300"></hr>
 
-                    <div class="mt-4">
-                        <button type="submit" class="flex items-center justify-center py-2.5 px-4 text-sm sm:text-lg font-medium rounded-lg bg-black text-white">
-                            <i class="ph-bold ph-heart-straight text-sm sm:text-lg"></i>
+                    {{-- Updated Favorite Button --}}
+                    @auth
+                        <button
+                            class="favorite-btn {{ $isFavorite ? 'active' : '' }}"
+                            data-meal-id="{{ $meal['idMeal'] }}"
+                            data-meal-name="{{ $meal['strMeal'] }}"
+                            data-meal-thumb="{{ $meal['strMealThumb'] }}"
+                        >
+                            <i class="text-lg sm:text-xl {{ $isFavorite ? 'ph-fill text-white' : 'ph-bold text-gray-400' }} ph-heart"></i>  
+                            <span>
+                                {{ $isFavorite ? 'Remove from Favorites' : 'Add to Favorites' }}
+                            </span>
                         </button>
-                    </div>
+                    @endauth
                 </div>
             </div>
         </div>
     </section>
     
     @include('footer')
+
+    @auth
+<script>
+    document.querySelectorAll('.favorite-btn').forEach(button => {
+        button.addEventListener('click', async function () {
+            const mealId = this.dataset.mealId;
+            const mealName = this.dataset.mealName;
+            const mealThumb = this.dataset.mealThumb;
+            const icon = this.querySelector('i');
+            const textSpan = this.querySelector('span');
+
+            try {
+                const res = await fetch("{{ route('favorite.toggle') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        meal_id: mealId,
+                        meal_name: mealName,
+                        meal_thumb: mealThumb
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.status === "added") {
+                    icon.classList.remove('ph-bold', 'text-gray-400');
+                    icon.classList.add('ph-fill', 'text-white');
+                    this.classList.add('active');
+                    textSpan.textContent = "Remove from Favorites";
+                } else if (data.status === "removed") {
+                    icon.classList.remove('ph-fill', 'text-white');
+                    icon.classList.add('ph-bold', 'text-gray-400');
+                    this.classList.remove('active');
+                    textSpan.textContent = "Add to Favorites";
+                }
+            } catch (err) {
+                alert("You need to login first.");
+            }
+        });
+    });
+</script>
+@endauth
 </body>
 </html>
