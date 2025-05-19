@@ -18,8 +18,22 @@
 
         <!-- Search Bar -->
         <div class="flex justify-between items-center w-1/2 rounded-sm text-slate-500 bg-white">
-            <form class="ml-4">Search</form>
-            <i class="p-2 rounded-e-sm text-xl ph ph-magnifying-glass bg-amber-500 text-white"></i>
+            <form action="{{ route('meals.index') }}" method="GET" class="flex w-full bg-white rounded-sm overflow-hidden">
+                <!-- Input field on the left -->
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search meals..."
+                    value="{{ request('search') }}"
+                    class="flex-grow px-4 py-2 text-black placeholder:text-gray-400 focus:outline-none"
+                    required
+                />
+
+                <!-- Button on the right -->
+                <button type="submit" class="px-4 bg-amber-500 text-white hover:bg-amber-600 transition-colors">
+                    <i class="ph ph-magnifying-glass text-xl"></i>
+                </button>
+            </form>
         </div>
 
         <!-- Icons -->

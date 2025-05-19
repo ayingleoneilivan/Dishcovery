@@ -33,14 +33,14 @@
         x-transition:enter="opacity-0"
         x-transition:enter-end="opacity-100"
       >
-        <!-- ⬇️ Make image clickable -->
         <a :href="`{{ url('/meal') }}/${meal.idMeal}`">
           <div class="w-full h-full rounded-4xl overflow-hidden">
-            <img 
-                :src="meal.strMealThumb" 
-                :alt="meal.strMeal" 
-                class="object-cover object-center w-full h-full hover:opacity-90 transition duration-300"/>
-            </div>
+        <img 
+            :src="meal.strMealThumb" 
+            :alt="meal.strMeal" 
+            class="object-cover object-center w-full h-full hover:opacity-90 transition duration-300"
+        />
+        </div>
         </a>
 
         <div class="absolute top-1/4 left-10 z-10">
