@@ -13,7 +13,7 @@
             <li></li>
             <li></li>
             <a href="{{ route('meals.index') }}"><li>Home</li></a>
-            <li>About</li>
+            <a href="{{ route('about') }}"><li>About</li></a>
         </ul>
 
         <!-- Search Bar -->

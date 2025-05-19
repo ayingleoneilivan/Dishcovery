@@ -14,6 +14,7 @@ Route::get('/product-details', function () {
 Route::get('/', function () {
     return view('auth.login');
 });
+Route::view('/about', 'about')->name('about');
 
 Route::get('/meals', [MealController::class, 'index'])->name('meals.index');
 Route::get('/test-api', [MealController::class, 'testApi']);
