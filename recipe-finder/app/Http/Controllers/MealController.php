@@ -79,6 +79,8 @@ public function show($id)
 {
     $result = $this->mealService->getMealById($id);
 
+    
+
     if (!$result['success'] || empty($result['data']['meals'])) {
         abort(404, 'Meal not found.');
     }

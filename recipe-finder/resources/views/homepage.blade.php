@@ -6,28 +6,63 @@
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Dishcovery</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+    .text-shadow {
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.75);
+    }
+    </style>
 </head>
 
 <body class="bg-slate-100">
 <header>
     @include('navbar')
 </header>
-<section class="my-12 mx-20">
-<!-- <section class="my-16 w-full max-w-screen-xl mx-auto"> -->
-    <div class="relative h-56 overflow-hidden rounded-4xl md:h-96">
-        <img class="relative bottom-4" src="/images/Pork Adobo.jpg" alt="">
-        <div class="absolute top-20 left-20">
-            <h1 class="text-3xl font-semibold text-shadow-xs text-shadow-black text-amber-400">Trending now</h1>
-            <h2 class="text-6xl font-bold text-shadow-xs/30 text-shadow-black text-white">Pork Adobo</h2>
+<section 
+  class="my-12 mx-20"
+  x-data="mealCarousel"
+  x-init="fetchMeals()"
+>
+  <div class="relative overflow-hidden rounded-4xl h-[300px] md:h-[400px] lg:h-[500px]">
+
+    <!-- Slides -->
+    <template x-for="(meal, index) in meals" :key="meal.idMeal">
+      <div 
+        x-show="activeSlide === index"
+        class="absolute inset-0 transition-opacity duration-700 ease-in-out"
+        x-transition:enter="opacity-0"
+        x-transition:enter-end="opacity-100"
+      >
+        <!-- ⬇️ Make image clickable -->
+        <a :href="`{{ url('/meal') }}/${meal.idMeal}`">
+          <div class="w-full h-full rounded-4xl overflow-hidden">
+            <img 
+                :src="meal.strMealThumb" 
+                :alt="meal.strMeal" 
+                class="object-cover object-center w-full h-full hover:opacity-90 transition duration-300"/>
+            </div>
+        </a>
+
+        <div class="absolute top-1/4 left-10 z-10">
+          <h1 class="text-3xl font-semibold text-shadow text-amber-400">Trending now</h1>
+          <h2 class="text-5xl lg:text-6xl font-bold text-shadow text-white" x-text="meal.strMeal"></h2>
         </div>
-        <div class="flex absolute bottom-12 -translate-x-1/2 left-1/2 space-x-2">
-            <button class="w-3 h-3"><i class="text-7xl text-amber-400 opacity-100 ph-bold ph-dot"></i></button>
-            <button class="w-3 h-3"><i class="text-7xl text-white opacity-75 ph-bold ph-dot"></i></button>
-            <button class="w-3 h-3"><i class="text-7xl text-white opacity-75 ph-bold ph-dot"></i></button>
-            <button class="w-3 h-3"><i class="text-7xl text-white opacity-75 ph-bold ph-dot"></i></button>
-            <button class="w-3 h-3"><i class="text-7xl text-white opacity-75 ph-bold ph-dot"></i></button>
-        </div>
+      </div>
+    </template>
+
+    <!-- Dot Buttons -->
+    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
+      <div class="flex bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full space-x-2">
+        <template x-for="(meal, index) in meals" :key="'dot-' + index">
+          <button 
+            class="w-4 h-4 rounded-full transition-all duration-200"
+            @click="activeSlide = index"
+            :class="activeSlide === index ? 'bg-amber-400 scale-125 shadow' : 'bg-white/70 hover:bg-amber-300'"
+          ></button>
+        </template>
+      </div>
     </div>
+  </div>
 </section>
 
 <section class="my-16 mx-20">
@@ -162,6 +197,26 @@
                 alert("You need to login first.");
             }
         });
+    });
+
+    document.addEventListener('alpine:init', () => {
+    Alpine.data('mealCarousel', () => ({
+        meals: [],
+        activeSlide: 0,
+        fetchMeals() {
+        fetch('https://www.themealdb.com/api/json/v1/1/filter.php?c=Beef') // Change category if needed
+            .then(res => res.json())
+            .then(data => {
+            this.meals = data.meals.slice(0, 5);
+            this.startAutoSlide();
+            });
+        },
+        startAutoSlide() {
+        setInterval(() => {
+            this.activeSlide = (this.activeSlide + 1) % this.meals.length;
+        }, 5000);
+        }
+    }));
     });
 </script>
 </body>
