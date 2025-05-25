@@ -19,7 +19,7 @@
     @include('navbar')
 </header>
 <section 
-  class="my-12 mx-20"
+  class="my-10 mx-15"
   x-data="mealCarousel"
   x-init="fetchMeals()"
 >
@@ -27,45 +27,60 @@
 
     <!-- Slides -->
     <template x-for="(meal, index) in meals" :key="meal.idMeal">
-      <div 
+    <div 
         x-show="activeSlide === index"
         class="absolute inset-0 transition-opacity duration-700 ease-in-out"
         x-transition:enter="opacity-0"
         x-transition:enter-end="opacity-100"
-      >
-        <a :href="`{{ url('/meal') }}/${meal.idMeal}`">
-          <div class="w-full h-full rounded-4xl overflow-hidden">
+    >
+        <!-- Slide container with overlay -->
+        <div class="relative w-full h-full rounded-4xl overflow-hidden">
         <img 
             :src="meal.strMealThumb" 
             :alt="meal.strMeal" 
-            class="object-cover object-center w-full h-full hover:opacity-90 transition duration-300"
+            class="object-cover object-center w-full h-full"
         />
-        </div>
-        </a>
+        <!-- Gradient overlay -->
+        <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
 
-        <div class="absolute top-1/4 left-10 z-10">
-          <h1 class="text-3xl font-semibold text-shadow text-amber-400">Trending now</h1>
-          <h2 class="text-5xl lg:text-6xl font-bold text-shadow text-white" x-text="meal.strMeal"></h2>
+        <!-- Text content -->
+            <div class="absolute left-20 sm:left-20 top-1/4 z-30 max-w-md">
+                <h1 class="text-lg sm:text-2xl font-semibold text-amber-400 drop-shadow-lg mb-3">
+                Featured Recipe
+                </h1>
+                <h2 
+                class="text-3xl sm:text-5xl lg:text-6xl font-bold text-white drop-shadow-xl leading-tight mb-5"
+                x-text="meal.strMeal"
+                ></h2>
+                <a 
+                :href="`{{ url('/meal') }}/${meal.idMeal}`"
+                class="inline-block px-5 py-3 bg-amber-400 text-black font-semibold rounded-xl shadow-md hover:bg-amber-500 transition"
+                >
+                View Recipe
+                </a>
+            </div>
         </div>
-      </div>
+    </div>
     </template>
 
     <!-- Dot Buttons -->
-    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
-      <div class="flex bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full space-x-2">
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+    <div class="flex space-x-2">
         <template x-for="(meal, index) in meals" :key="'dot-' + index">
-          <button 
-            class="w-4 h-4 rounded-full transition-all duration-200"
+        <button 
+            class="w-2.5 h-2.5 rounded-full transition-all duration-200"
             @click="activeSlide = index"
-            :class="activeSlide === index ? 'bg-amber-400 scale-125 shadow' : 'bg-white/70 hover:bg-amber-300'"
-          ></button>
+            :class="activeSlide === index 
+            ? 'bg-amber-400 scale-110 shadow-md' 
+            : 'bg-white/70 hover:bg-amber-300'"
+        ></button>
         </template>
-      </div>
+    </div>
     </div>
   </div>
 </section>
 
-<section class="my-16 mx-20">
+<section class="my-10 mx-15">
 <!-- <section class="my-16 w-full max-w-screen-xl mx-auto"> -->
     <div class="grid grid-cols-4">
         <div class="col-span-1">
@@ -203,14 +218,27 @@
     Alpine.data('mealCarousel', () => ({
         meals: [],
         activeSlide: 0,
-        fetchMeals() {
-        fetch('https://www.themealdb.com/api/json/v1/1/filter.php?c=Beef') // Change category if needed
-            .then(res => res.json())
-            .then(data => {
-            this.meals = data.meals.slice(0, 5);
-            this.startAutoSlide();
-            });
+
+        async fetchMeals() {
+        this.meals = [];
+
+        while (this.meals.length < 5) {
+            const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+            const data = await res.json();
+            const meal = data.meals[0];
+
+            // Only push meals with short names
+            if (meal.strMeal.length <= 30) {
+            // Prevent duplicates by ID
+            if (!this.meals.some(m => m.idMeal === meal.idMeal)) {
+                this.meals.push(meal);
+            }
+            }
+        }
+
+        this.startAutoSlide();
         },
+
         startAutoSlide() {
         setInterval(() => {
             this.activeSlide = (this.activeSlide + 1) % this.meals.length;
