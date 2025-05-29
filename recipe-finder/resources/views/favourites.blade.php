@@ -11,11 +11,13 @@
 <body class="bg-slate-100">
   @include('navbar')
 
-  <section class="mx-52 my-20">
-    <h1 class="text-4xl font-bold">Favorites</h1>
-    <hr class="my-4 flex-grow border-t border-gray-300"></hr>
+  <!-- Responsive Section -->
+  <section class="mx-4 sm:mx-8 md:mx-16 lg:mx-32 xl:mx-52 my-20">
+    <h1 class="text-3xl sm:text-4xl font-bold">Favorites</h1>
+    <hr class="my-4 border-t border-gray-300">
 
-    <div class="mt-8 grid grid-cols-3 gap-4">
+    <!-- Responsive Grid -->
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       @forelse($favorites as $favorite)
         <div class="bg-white rounded-2xl shadow-md overflow-hidden">
           <a href="{{ route('meal.details', ['id' => $favorite->meal_id]) }}">
@@ -27,14 +29,12 @@
             <div>
               <p class="text-sm text-slate-500">Food</p>
               <a href="{{ route('meal.details', ['id' => $favorite->meal_id]) }}">
-                <h1 class="text-xl font-bold">{{ $favorite->meal_data['name'] }}</h1>
+                <h1 class="text-lg sm:text-xl font-bold">{{ $favorite->meal_data['name'] }}</h1>
               </a>
             </div>
             <div class="flex flex-col justify-between items-end">
-              <div class="flex items-center space-x-2">
-              </div>
               <button 
-                  class="favorite-btn"
+                  class="favorite-btn mt-5"
                   style="cursor: pointer;" 
                   data-meal-id="{{ $favorite->meal_id }}" 
                   data-meal-name="{{ $favorite->meal_data['name'] }}"
@@ -46,10 +46,11 @@
           </div>
         </div>
       @empty
-        <p class="text-gray-600 col-span-3">You haven’t added any meals to your favorites yet.</p>
+        <p class="text-gray-600 col-span-1 sm:col-span-2 lg:col-span-3">You haven’t added any meals to your favorites yet.</p>
       @endforelse
     </div>
   </section>
+
   @include('footer')
   
   <script>
@@ -88,6 +89,6 @@
             }
         });
     });
-</script>
+  </script>
 </body>
 </html>
